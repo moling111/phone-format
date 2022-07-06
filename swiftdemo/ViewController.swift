@@ -36,11 +36,9 @@ extension ViewController: UITextFieldDelegate {
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 
         if textField == self.textField, let text = textField.text {
-            guard let pureNumString = getPureNumString(string) else { return false }
-            print("pureNumString = \(pureNumString)")
             var newStr = text
             var operate: TextFieldOperate = .none
-            let isDeleting = range.length > 0 && pureNumString.isEmpty
+            let isDeleting = range.length > 0 && string.isEmpty
             if isDeleting == true { //删除元素
                 if range.length > 1 { return false }
                 let deleteIndex = text.index(text.startIndex, offsetBy: range.location)
@@ -53,14 +51,17 @@ extension ViewController: UITextFieldDelegate {
                 }
             } else {//新增元素首字母只能为“1”
                 let insertIndex = text.index(text.startIndex, offsetBy: range.location)
-                newStr.insert(contentsOf: pureNumString, at: insertIndex)
+                newStr.insert(contentsOf: string, at: insertIndex)
                 if newStr.hasPrefix("1") == false { return false }
                 if newStr.count > 13 { return false }
-                if pureNumString.count > 1 {
-                    operate = .copyNum
-                } else {
-                    operate = .insertNum
-                }
+            }
+            guard let pureNumString = getPureNumString(string) else {
+                return false
+            }
+            if pureNumString.count > 1 {
+                operate = .copyNum
+            } else if pureNumString.count == 1 {
+                operate = .insertNum
             }
             
             let formatting = formatNumberString(newStr)
@@ -68,10 +69,10 @@ extension ViewController: UITextFieldDelegate {
                 textField.text = formatted
                 var tuple: CharCountTuple? = nil
                 if operate == .copyNum || operate == .insertNum {
-                    let addWhiteSpaceCount = formatted.count - newStr.count
+                    let addWhiteSpaceCount = formatted.count - text.count - pureNumString.count
                     tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: pureNumString.count)
                 }
-                print("newStr = \(newStr), formatted = \(formatting ?? ""), range = \(range), tuple = \(tuple ?? (0, 0))")
+                print("operate = \(operate), newStr = \(newStr), formatted = \(formatting ?? ""), range = \(range), tuple = \(tuple ?? (0, 0))")
                 setCursorPosition(textField, range: range, operate: operate, insertCharCountTuple: tuple)
                 return false
             }
