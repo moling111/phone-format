@@ -34,11 +34,13 @@ class ViewController: UIViewController {
 extension ViewController: UITextFieldDelegate {
     /// 手机号格式: 1xx xxxx xxxx
     public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        
+
         if textField == self.textField, let text = textField.text {
+            guard let pureNumString = getPureNumString(string) else { return false }
+            print("pureNumString = \(pureNumString)")
             var newStr = text
             var operate: TextFieldOperate = .none
-            let isDeleting = range.length > 0 && string.isEmpty
+            let isDeleting = range.length > 0 && pureNumString.isEmpty
             if isDeleting == true { //删除元素
                 if range.length > 1 { return false }
                 let deleteIndex = text.index(text.startIndex, offsetBy: range.location)
@@ -51,10 +53,10 @@ extension ViewController: UITextFieldDelegate {
                 }
             } else {//新增元素首字母只能为“1”
                 let insertIndex = text.index(text.startIndex, offsetBy: range.location)
-                newStr.insert(contentsOf: string, at: insertIndex)
+                newStr.insert(contentsOf: pureNumString, at: insertIndex)
                 if newStr.hasPrefix("1") == false { return false }
                 if newStr.count > 13 { return false }
-                if string.count > 1 {
+                if pureNumString.count > 1 {
                     operate = .copyNum
                 } else {
                     operate = .insertNum
@@ -67,7 +69,7 @@ extension ViewController: UITextFieldDelegate {
                 var tuple: CharCountTuple? = nil
                 if operate == .copyNum || operate == .insertNum {
                     let addWhiteSpaceCount = formatted.count - newStr.count
-                    tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: string.count)
+                    tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: pureNumString.count)
                 }
                 print("newStr = \(newStr), formatted = \(formatting ?? ""), range = \(range), tuple = \(tuple ?? (0, 0))")
                 setCursorPosition(textField, range: range, operate: operate, insertCharCountTuple: tuple)
@@ -89,11 +91,13 @@ extension ViewController: UITextFieldDelegate {
         case .copyNum:
             let addNumCount = insertCharCountTuple?.numCount ?? 0
             let beforeCursorLocation = range.location + addNumCount
-            let locationBeforeWhiteSapceCount: Int
-            switch range.location {
-            case 0...3: locationBeforeWhiteSapceCount = 0
-            case 4...7: locationBeforeWhiteSapceCount = 1
-            default: locationBeforeWhiteSapceCount = 2
+            var locationBeforeWhiteSapceCount: Int = 0
+            for index in 0 ..< range.location {
+                let stringIndex = inputText.index(inputText.startIndex, offsetBy: index)
+                let inputChar = inputText[stringIndex]
+                if inputChar == Character(" ") {
+                    locationBeforeWhiteSapceCount += 1
+                }
             }
             let whiteSapceCount: Int
             switch beforeCursorLocation - locationBeforeWhiteSapceCount {
@@ -133,9 +137,7 @@ extension ViewController: UITextFieldDelegate {
     }
     
     fileprivate func formatNumberString(_ number: String) -> String? {
-        let arrNum: [Character] = ["0","1","2","3","4","5","6","7","8","9"]
-        var pureNumText = number.filter { arrNum.contains($0) }
-        if pureNumText.isEmpty { return nil }
+        guard var pureNumText = getPureNumString(number), pureNumText.isEmpty == false else { return nil }
         switch pureNumText.count {
         case 0...3:
             break
@@ -148,6 +150,14 @@ extension ViewController: UITextFieldDelegate {
             pureNumText.insert(" ", at: flashbackIndex1)
             pureNumText.insert(" ", at: flashbackIndex2)
         }
+        return pureNumText
+    }
+    
+    fileprivate func getPureNumString(_ number: String) -> String? {
+        if number.isEmpty == true { return "" }
+        let arrNum: [Character] = ["0","1","2","3","4","5","6","7","8","9"]
+        let pureNumText = number.filter { arrNum.contains($0) }
+        if pureNumText.isEmpty { return nil }
         return pureNumText
     }
 
