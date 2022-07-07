@@ -76,3 +76,5 @@ fastlane/test_output
 .DS_Store
 
 swiftdemo.xcodeproj/project.xcworkspace/
+.DS_Store
+swiftdemo.xcodeproj/project.xcworkspace/xcuserdata/guanzejun.xcuserdatad/UserInterfaceState.xcuserstate
