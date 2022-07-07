@@ -75,11 +75,4 @@ fastlane/test_output
 
 .DS_Store
 
-SDK/MultiSdk/arm64_iphoneos_debug/.ninja_log
-SDK/MultiSdk/arm64_iphoneos_release/.ninja_log
-SDK/MultiSdk/armv7_iphoneos_debug/.ninja_log
-SDK/MultiSdk/armv7_iphoneos_release/.ninja_log
-SDK/MultiSdk/ia32_iphonesim_debug/.ninja_log
-SDK/MultiSdk/ia32_iphonesim_release/.ninja_log
-SDK/MultiSdk/x86_64_iphoneos_debug/.ninja_log
-SDK/MultiSdk/x86_64_iphoneos_release/.ninja_log
+swiftdemo.xcodeproj/project.xcworkspace/
