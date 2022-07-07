@@ -134,7 +134,13 @@ extension PFTextField {
     }
     
     fileprivate func formatNumberString(_ number: String) -> String? {
-        guard var pureNumText = getPureNumString(number), pureNumText.isEmpty == false else { return nil }
+        guard let tmpPureNumText = getPureNumString(number), tmpPureNumText.isEmpty == false else { return nil }
+        var pureNumText: String = ""
+        if tmpPureNumText.count > 11 {
+            pureNumText = tmpPureNumText.substring(to: 11) ?? ""
+        } else {
+            pureNumText = tmpPureNumText
+        }
         switch pureNumText.count {
         case 0...3:
             break
