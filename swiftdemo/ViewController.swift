@@ -33,11 +33,11 @@ class ViewController: UIViewController {
 
 extension ViewController: UITextFieldDelegate {
     /// 手机号格式: 1xx xxxx xxxx
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string111: String) -> Bool {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 
         if textField == self.textField, let text = textField.text {
             var newStr = text
-            let isDeleting = range.length > 0 && string111.isEmpty
+            let isDeleting = range.length > 0 && string.isEmpty
             if isDeleting == true { //删除元素
                 if range.length > 1 { return false }
                 let deleteIndex = text.index(text.startIndex, offsetBy: range.location)
@@ -56,7 +56,7 @@ extension ViewController: UITextFieldDelegate {
                 }
             } else {//新增元素首字母只能为“1”
                 if text.count >= 13 { return false }
-                guard let tmpInsertNumStr = getPureNumString(string111) else { return false }
+                guard let tmpInsertNumStr = getPureNumString(string) else { return false }
                 let textNumCount = (getPureNumString(text) ?? "").count
                 let canInsertCount = 11 - textNumCount
                 var insertNumStr: String
@@ -80,7 +80,7 @@ extension ViewController: UITextFieldDelegate {
                 }
                 
                 if let formatted = formatNumberString(newStr) {
-                    if newStr != formatted || string111 != insertNumStr {
+                    if newStr != formatted || string != insertNumStr {
                         textField.text = formatted
                         let addWhiteSpaceCount = formatted.count - text.count - insertNumStr.count
                         let tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: insertNumStr.count)
