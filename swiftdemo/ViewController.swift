@@ -33,12 +33,11 @@ class ViewController: UIViewController {
 
 extension ViewController: UITextFieldDelegate {
     /// 手机号格式: 1xx xxxx xxxx
-    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string111: String) -> Bool {
 
         if textField == self.textField, let text = textField.text {
             var newStr = text
-            var operate: TextFieldOperate = .none
-            let isDeleting = range.length > 0 && string.isEmpty
+            let isDeleting = range.length > 0 && string111.isEmpty
             if isDeleting == true { //删除元素
                 if range.length > 1 { return false }
                 let deleteIndex = text.index(text.startIndex, offsetBy: range.location)
@@ -47,34 +46,48 @@ extension ViewController: UITextFieldDelegate {
                     setCursorPosition(textField, range: range, operate: .deleteWhiteSpace)
                     return false
                 } else {
-                    operate = .deleteNum
+                    if let formatted = formatNumberString(newStr), newStr != formatted {
+                        textField.text = formatted
+                        setCursorPosition(textField, range: range, operate: .deleteNum)
+                        return false
+                    } else {
+                        return true
+                    }
                 }
             } else {//新增元素首字母只能为“1”
-                let insertIndex = text.index(text.startIndex, offsetBy: range.location)
-                newStr.insert(contentsOf: string, at: insertIndex)
-                if newStr.hasPrefix("1") == false { return false }
-                if newStr.count > 13 { return false }
-            }
-            guard let pureNumString = getPureNumString(string) else {
-                return false
-            }
-            if pureNumString.count > 1 {
-                operate = .copyNum
-            } else if pureNumString.count == 1 {
-                operate = .insertNum
-            }
-            
-            let formatting = formatNumberString(newStr)
-            if let formatted = formatting, newStr != formatted {
-                textField.text = formatted
-                var tuple: CharCountTuple? = nil
-                if operate == .copyNum || operate == .insertNum {
-                    let addWhiteSpaceCount = formatted.count - text.count - pureNumString.count
-                    tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: pureNumString.count)
+                if text.count >= 13 { return false }
+                guard let tmpInsertNumStr = getPureNumString(string111) else { return false }
+                let textNumCount = (getPureNumString(text) ?? "").count
+                let canInsertCount = 11 - textNumCount
+                var insertNumStr: String
+                if tmpInsertNumStr.count > canInsertCount {
+                    insertNumStr = tmpInsertNumStr.substring(to: canInsertCount) ?? ""
+                    debugPrint("insertNumStr = \(insertNumStr)")
+                } else {
+                    insertNumStr = tmpInsertNumStr
                 }
-                print("operate = \(operate), newStr = \(newStr), formatted = \(formatting ?? ""), range = \(range), tuple = \(tuple ?? (0, 0))")
-                setCursorPosition(textField, range: range, operate: operate, insertCharCountTuple: tuple)
-                return false
+                let insertIndex = text.index(text.startIndex, offsetBy: range.location)
+                newStr.insert(contentsOf: insertNumStr, at: insertIndex)
+                if newStr.hasPrefix("1") == false { return false }
+                
+                var operate: TextFieldOperate = .none
+                if insertNumStr.count > 1 {
+                    operate = .copyNum
+                } else if insertNumStr.count == 1 {
+                    operate = .insertNum
+                } else {
+                    return false
+                }
+                
+                if let formatted = formatNumberString(newStr) {
+                    if newStr != formatted || string111 != insertNumStr {
+                        textField.text = formatted
+                        let addWhiteSpaceCount = formatted.count - text.count - insertNumStr.count
+                        let tuple = (whiteSapceCount: addWhiteSpaceCount, numCount: insertNumStr.count)
+                        setCursorPosition(textField, range: range, operate: operate, insertCharCountTuple: tuple)
+                        return false
+                    }
+                }
             }
         }
         return true
