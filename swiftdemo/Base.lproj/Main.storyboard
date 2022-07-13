@@ -27,11 +27,23 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="32"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="请输入" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3t7-Hd-gaq">
+                                <rect key="frame" x="50" y="94" width="314" height="50"/>
+                                <color key="backgroundColor" red="0.78113776450000005" green="0.9020072818" blue="0.89411896469999996" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="mCf-gT-Lc9"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="V67-Pg-gCX" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="00E-ZS-kCy"/>
+                            <constraint firstItem="3t7-Hd-gaq" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="0bt-Rz-sp5"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="3t7-Hd-gaq" secondAttribute="trailing" constant="50" id="BYh-0q-CLV"/>
+                            <constraint firstItem="3t7-Hd-gaq" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="50" id="Udu-y1-ww5"/>
                             <constraint firstItem="V67-Pg-gCX" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="-150" id="fEi-dE-wok"/>
                         </constraints>
                     </view>

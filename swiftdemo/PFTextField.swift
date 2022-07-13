@@ -20,9 +20,9 @@ typealias CharCountTuple = (whiteSapceCount: Int, numCount: Int)
 
 class PFTextField: UITextField {
 
-    var didBeginEditingHandler: ((_ textField: UITextField) -> Void)?
+    var textDidBeginEditingHandler: ((_ textField: UITextField) -> Void)?
     
-    var didEndEditingHandler: ((_ textField: UITextField) -> Void)?
+    var textDidEndEditingHandler: ((_ textField: UITextField) -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -61,33 +61,37 @@ extension PFTextField: UITextFieldDelegate {
                         textField.text = formatted
                         setCursorPosition(textField, range: range, operate: .deleteNum)
                         return false
-                    } else {
-                        return true
                     }
                 }
             } else {//新增元素首字母只能为“1”
-                if text.count >= 13 { return false }
-                guard let tmpInsertNumStr = getPureNumString(string) else { return false }
+                if text.count >= 13 {
+                    setCursorPosition(textField, range: range, operate: .none)
+                    return false
+                }
+                guard let tmpInsertNumStr = getPureNumString(string) else {
+                    setCursorPosition(textField, range: range, operate: .none)
+                    return false
+                }
                 let textNumCount = (getPureNumString(text) ?? "").count
                 let canInsertCount = 11 - textNumCount
                 var insertNumStr: String
                 if tmpInsertNumStr.count > canInsertCount {
                     insertNumStr = tmpInsertNumStr.substring(to: canInsertCount) ?? ""
-                    debugPrint("insertNumStr = \(insertNumStr)")
                 } else {
                     insertNumStr = tmpInsertNumStr
                 }
                 let insertIndex = text.index(text.startIndex, offsetBy: range.location)
                 newStr.insert(contentsOf: insertNumStr, at: insertIndex)
-                if newStr.hasPrefix("1") == false { return false }
+                if newStr.hasPrefix("1") == false {
+                    setCursorPosition(textField, range: range, operate: .none)
+                    return false
+                }
                 
                 var operate: TextFieldOperate = .none
                 if insertNumStr.count > 1 {
                     operate = .copyNum
                 } else if insertNumStr.count == 1 {
                     operate = .insertNum
-                } else {
-                    return false
                 }
                 if let formatted = formatNumberString(newStr) {
                     if newStr != formatted || string != insertNumStr {
@@ -104,11 +108,11 @@ extension PFTextField: UITextFieldDelegate {
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        didBeginEditingHandler?(textField)
+        textDidBeginEditingHandler?(textField)
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        didEndEditingHandler?(textField)
+        textDidEndEditingHandler?(textField)
     }
     
 }
@@ -133,7 +137,7 @@ extension PFTextField {
         return pureNumText
     }
     
-    fileprivate func formatNumberString(_ number: String) -> String? {
+    internal func formatNumberString(_ number: String) -> String? {
         guard let tmpPureNumText = getPureNumString(number), tmpPureNumText.isEmpty == false else { return nil }
         var pureNumText: String = ""
         if tmpPureNumText.count > 11 {
@@ -209,7 +213,13 @@ extension PFTextField {
             guard let end = textField.position(from: start, offset: 0) else { return }
             textField.selectedTextRange = textField.textRange(from: start, to: end)
         default:
-            break
+            let starting = textField.position(from: textField.beginningOfDocument, offset: range.location)
+            guard let start = starting else { return }
+            guard let end = textField.position(from: start, offset: 0) else { return }
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+                textField.selectedTextRange = textField.textRange(from: start, to: end)
+            }
         }
     }
 }
+

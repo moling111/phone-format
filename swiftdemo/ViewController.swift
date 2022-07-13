@@ -17,10 +17,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
       
-        textField.didBeginEditingHandler = { (textField) -> Void in
-            
-            print("1111111  didBeginEditingHandler")
-        }
+       
         
       
         
@@ -28,9 +25,7 @@ class ViewController: UIViewController {
         
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        textField.resignFirstResponder()
-    }
+   
 }
 
 
