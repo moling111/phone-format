@@ -23,6 +23,8 @@ class PFTextField: UITextField {
     var textDidBeginEditingHandler: ((_ textField: UITextField) -> Void)?
     
     var textDidEndEditingHandler: ((_ textField: UITextField) -> Void)?
+        
+    var isPaste: Bool = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -129,6 +131,11 @@ extension PFTextField {
         }
     }
     
+    @objc override func paste(_ sender: Any?) {
+        isPaste = true
+        super.paste(sender)
+    }
+    
     fileprivate func getPureNumString(_ number: String) -> String? {
         if number.isEmpty == true { return "" }
         let arrNum: [Character] = ["0","1","2","3","4","5","6","7","8","9"]
@@ -189,7 +196,7 @@ extension PFTextField {
             let afterCursorLocation = beforeCursorLocation + whiteSapceCount - locationBeforeWhiteSapceCount
             guard let start = textField.position(from: textField.beginningOfDocument, offset: afterCursorLocation) else { return }
             guard let end = textField.position(from: start, offset: 0) else { return }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.02) {
                 textField.selectedTextRange = textField.textRange(from: start, to: end)
             }
         case .deleteNum:
@@ -203,7 +210,14 @@ extension PFTextField {
             let addNumCount = insertCharCountTuple?.numCount ?? 0
             let beforeCursorLocation = range.location + addNumCount
             let lastCursorLocation = beforeCursorLocation + addWhiteSapceCount
-            if lastCursorLocation == inputText.count { return }
+            if lastCursorLocation == inputText.count {
+                if isPaste == true {
+                    isPaste = false
+                    let range = NSRange(location: lastCursorLocation, length: 0)
+                    self.setCursorPosition(textField, range: range, operate: .none, insertCharCountTuple: nil)
+                }
+                return
+            }
             if range.location > inputText.count - 1 { return }
             let locationNextIndex = inputText.index(inputText.startIndex, offsetBy: range.location)
             let afterLocationChar = inputText[locationNextIndex]
@@ -211,12 +225,19 @@ extension PFTextField {
             let afterCursorLocation = beforeCursorLocation + moveWhiteSapceCount
             guard let start = textField.position(from: textField.beginningOfDocument, offset: afterCursorLocation) else { return }
             guard let end = textField.position(from: start, offset: 0) else { return }
-            textField.selectedTextRange = textField.textRange(from: start, to: end)
+            if isPaste == true {
+                isPaste = false
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.02) {
+                    textField.selectedTextRange = textField.textRange(from: start, to: end)
+                }
+            } else {
+                textField.selectedTextRange = textField.textRange(from: start, to: end)
+            }
         default:
             let starting = textField.position(from: textField.beginningOfDocument, offset: range.location)
             guard let start = starting else { return }
             guard let end = textField.position(from: start, offset: 0) else { return }
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.02) {
                 textField.selectedTextRange = textField.textRange(from: start, to: end)
             }
         }
